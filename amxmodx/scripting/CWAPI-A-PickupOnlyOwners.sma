@@ -26,6 +26,7 @@ public ParamsController_OnRegisterTypes() {
 public CWAPI_OnLoad() {
     register_plugin("[CWAPI-A] Pickup Only Owners", "1.0.0", "ArKaNeMaN");
     register_dictionary("CWAPI-A-PickupOnlyOwners.ini");
+    ParamsController_Init();
 
     iAbility = CWAPI_Abilities_Register(ABILITY_NAME);
 
