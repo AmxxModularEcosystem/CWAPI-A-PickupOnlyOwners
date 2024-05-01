@@ -10,11 +10,11 @@ enum E_BlockType {
     BlockType_Default,
     BlockType_Drop,
     BlockType_Remove,
+    BlockType_CantPickup,
 }
 
 new const ABILITY_NAME[] = "PickupOnlyOwners";
 new const PARAM_TYPE_NAME[] = "CWAPI-A-POO-BlockType";
-
 new const PARAM_BLOCK_TYPE_NAME[] = "BlockType";
 
 new T_WeaponAbility:iAbility = Invalid_WeaponAbility;
@@ -24,7 +24,7 @@ public ParamsController_OnRegisterTypes() {
 }
 
 public CWAPI_OnLoad() {
-    register_plugin("[CWAPI-A] Pickup Only Owners", "1.0.0", "ArKaNeMaN");
+    register_plugin("[CWAPI-A] Pickup Only Owners", "1.1.0", "ArKaNeMaN");
     register_dictionary("CWAPI-A-PickupOnlyOwners.ini");
     ParamsController_Init();
 
@@ -34,6 +34,7 @@ public CWAPI_OnLoad() {
         PARAM_BLOCK_TYPE_NAME, PARAM_TYPE_NAME, true
     );
     CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnAddPlayerItem, "@OnAddPlayerItem");
+    CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnPlayerCanHaveWeapon, "@OnPlayerCanHaveWeapon");
 }
 
 @OnAddPlayerItem(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
@@ -52,7 +53,7 @@ public CWAPI_OnLoad() {
             rg_remove_item(UserId, sItemClassname);
             rg_give_item(UserId, sItemClassname);
         }
-        case BlockType_Drop: {
+        case BlockType_Drop, BlockType_CantPickup: {
             rg_drop_item(UserId, sItemClassname);
         }
         case BlockType_Remove: {
@@ -60,7 +61,23 @@ public CWAPI_OnLoad() {
         }
     }
     
-    client_print(UserId, print_center, "%L", LANG_PLAYER, "CWAPI_A_POO_BLOCK_MESSAGE");
+    client_print(UserId, print_center, "%L", UserId, "CWAPI_A_POO_BLOCK_MESSAGE");
+}
+
+@OnPlayerCanHaveWeapon(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
+    if (get_entvar(ItemId, var_CWAPI_ItemOwner) == UserId) {
+        return CWAPI_CONTINUE;
+    }
+
+    new E_BlockType:iBlockType;
+    TrieGetCell(tAbilityParams, PARAM_BLOCK_TYPE_NAME, iBlockType);
+
+    if (iBlockType != BlockType_CantPickup) {
+        return CWAPI_CONTINUE;
+    }
+    
+    client_print(UserId, print_center, "%L", UserId, "CWAPI_A_POO_BLOCK_MESSAGE");
+    return CWAPI_STOP_MAIN;
 }
 
 bool:@OnBlockTypeParamRead(const JSON:jValue) {
@@ -82,6 +99,8 @@ E_BlockType:StrToBlockType(const sBlockType[]) {
         return BlockType_Drop;
     } else if (equali(sBlockType, "Remove")) {
         return BlockType_Remove;
+    } else if (equali(sBlockType, "CantPickup")) {
+        return BlockType_CantPickup;
     }
 
     return BlockType_Invalid;
