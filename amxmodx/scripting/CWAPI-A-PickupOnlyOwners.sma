@@ -65,7 +65,8 @@ public CWAPI_OnLoad() {
 }
 
 @OnPlayerCanHaveWeapon(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
-    if (get_entvar(ItemId, var_CWAPI_ItemOwner) == UserId) {
+    new OwnerId = get_entvar(ItemId, var_CWAPI_ItemOwner);
+    if (!OwnerId || OwnerId == UserId) {
         return CWAPI_CONTINUE;
     }
 
