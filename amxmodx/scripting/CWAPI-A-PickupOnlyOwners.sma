@@ -34,7 +34,7 @@ public CWAPI_OnLoad() {
         PARAM_BLOCK_TYPE_NAME, PARAM_TYPE_NAME, true
     );
     CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnAddPlayerItem, "@OnAddPlayerItem");
-    CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnPlayerCanHaveWeapon, "@OnPlayerCanHaveWeapon");
+    CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnPlayerTouchWeaponBox, "@OnPlayerTouchWeaponBox");
 }
 
 @OnAddPlayerItem(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
@@ -64,7 +64,15 @@ public CWAPI_OnLoad() {
     client_print(UserId, print_center, "%L", UserId, "CWAPI_A_POO_BLOCK_MESSAGE");
 }
 
-@OnPlayerCanHaveWeapon(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
+new g_iLastTouch[MAX_PLAYERS + 1] = {0, ...};
+new const TOUCH_CHECK_INTERVAL = 1;
+
+@OnPlayerTouchWeaponBox(const T_CustomWeapon:iWeapon, const iWeaponBox, const ItemId, const UserId, const Trie:tAbilityParams) {
+    if (g_iLastTouch[UserId] + TOUCH_CHECK_INTERVAL > get_systime()) {
+        return CWAPI_STOP_MAIN;
+    }
+    g_iLastTouch[UserId] = get_systime();
+
     new OwnerId = get_entvar(ItemId, var_CWAPI_ItemOwner);
     if (!OwnerId || OwnerId == UserId) {
         return CWAPI_CONTINUE;
