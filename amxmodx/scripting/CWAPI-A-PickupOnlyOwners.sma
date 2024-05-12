@@ -71,7 +71,6 @@ new const TOUCH_CHECK_INTERVAL = 1;
     if (g_iLastTouch[UserId] + TOUCH_CHECK_INTERVAL > get_systime()) {
         return CWAPI_STOP_MAIN;
     }
-    g_iLastTouch[UserId] = get_systime();
 
     new OwnerId = get_entvar(ItemId, var_CWAPI_ItemOwner);
     if (!OwnerId || OwnerId == UserId) {
@@ -85,6 +84,7 @@ new const TOUCH_CHECK_INTERVAL = 1;
         return CWAPI_CONTINUE;
     }
     
+    g_iLastTouch[UserId] = get_systime();
     client_print(UserId, print_center, "%L", UserId, "CWAPI_A_POO_BLOCK_MESSAGE");
     return CWAPI_STOP_MAIN;
 }
