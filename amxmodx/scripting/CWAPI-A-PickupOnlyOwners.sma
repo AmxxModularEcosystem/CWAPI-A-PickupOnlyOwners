@@ -16,6 +16,7 @@ enum E_BlockType {
 new const ABILITY_NAME[] = "PickupOnlyOwners";
 new const PARAM_TYPE_NAME[] = "CWAPI-A-POO-BlockType";
 new const PARAM_BLOCK_TYPE_NAME[] = "BlockType";
+new const PARAM_IMMUNE_FLAGS_NAME[] = "ImmuneFlags";
 
 new T_WeaponAbility:iAbility = Invalid_WeaponAbility;
 
@@ -24,14 +25,15 @@ public ParamsController_OnRegisterTypes() {
 }
 
 public CWAPI_OnLoad() {
-    register_plugin("[CWAPI-A] Pickup Only Owners", "1.1.1", "ArKaNeMaN");
+    register_plugin("[CWAPI-A] Pickup Only Owners", "1.1.2", "ArKaNeMaN");
     register_dictionary("CWAPI-A-PickupOnlyOwners.ini");
     ParamsController_Init();
 
     iAbility = CWAPI_Abilities_Register(ABILITY_NAME);
 
     CWAPI_Abilities_AddParams(iAbility,
-        PARAM_BLOCK_TYPE_NAME, PARAM_TYPE_NAME, true
+        PARAM_BLOCK_TYPE_NAME, PARAM_TYPE_NAME, true,
+        PARAM_IMMUNE_FLAGS_NAME, "ShortString", false
     );
     CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnAddPlayerItem, "@OnAddPlayerItem");
     CWAPI_Abilities_AddEventListener(iAbility, CWeapon_OnPlayerTouchWeaponBox, "@OnPlayerTouchWeaponBox");
@@ -39,6 +41,13 @@ public CWAPI_OnLoad() {
 
 @OnAddPlayerItem(const T_CustomWeapon:iWeapon, const ItemId, const UserId, const Trie:tAbilityParams) {
     if (get_entvar(ItemId, var_CWAPI_ItemOwner) == UserId) {
+        return;
+    }
+
+    new sImmuneFlags[32];
+    TrieGetString(tAbilityParams, PARAM_IMMUNE_FLAGS_NAME, sImmuneFlags, charsmax(sImmuneFlags));
+
+    if (get_user_flags(UserId) & read_flags(sImmuneFlags)) {
         return;
     }
 
@@ -81,6 +90,13 @@ new const TOUCH_CHECK_INTERVAL = 1;
     TrieGetCell(tAbilityParams, PARAM_BLOCK_TYPE_NAME, iBlockType);
 
     if (iBlockType != BlockType_CantPickup) {
+        return CWAPI_CONTINUE;
+    }
+
+    new sImmuneFlags[32];
+    TrieGetString(tAbilityParams, PARAM_IMMUNE_FLAGS_NAME, sImmuneFlags, charsmax(sImmuneFlags));
+
+    if (get_user_flags(UserId) & read_flags(sImmuneFlags)) {
         return CWAPI_CONTINUE;
     }
     
