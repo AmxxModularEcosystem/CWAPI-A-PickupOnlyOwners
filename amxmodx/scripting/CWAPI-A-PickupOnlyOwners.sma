@@ -25,7 +25,7 @@ public ParamsController_OnRegisterTypes() {
 }
 
 public CWAPI_OnLoad() {
-    register_plugin("[CWAPI-A] Pickup Only Owners", "1.1.2", "ArKaNeMaN");
+    register_plugin("[CWAPI-A] Pickup Only Owners", "1.2.0", "ArKaNeMaN");
     register_dictionary("CWAPI-A-PickupOnlyOwners.ini");
     ParamsController_Init();
 
